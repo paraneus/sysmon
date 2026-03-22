@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sysmon</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <p class="prompt"><span class="user">{{ user }}@{{ host }}</span><span class="path">:~/sysmon$</span></p>
+      <p class="subtitle"># system monitor — live</p>
+      <p class="uptime" id="uptime">—</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="grid">
+      <div class="card" id="cpu-card">
+        <div class="card-header">>> CPU</div>
+        <div class="percent" id="cpu-percent">—</div>
+        <div class="bar"><div class="fill" id="cpu-bar"></div></div>
+      </div>
+
+      <div class="card" id="ram-card">
+        <div class="card-header">>> RAM</div>
+        <div class="percent" id="ram-percent">—</div>
+        <div class="bar"><div class="fill" id="ram-bar"></div></div>
+        <div class="detail" id="ram-detail">—</div>
+      </div>
+
+      <div class="card" id="disk-card">
+        <div class="card-header">>> DISK</div>
+        <div class="percent" id="disk-percent">—</div>
+        <div class="bar"><div class="fill" id="disk-bar"></div></div>
+        <div class="detail" id="disk-detail">—</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span id="status">● online</span>
+    </div>
+
+  </div>
+
+  <script>
+    async function update() {
+      const res = await fetch("/api/stats");
+      const d = await res.json();
+
+      const set = (id, data) => {
+        document.getElementById(id + "-percent").textContent = data.percent + "%";
+        document.getElementById(id + "-bar").style.width = data.percent + "%";
+        document.getElementById(id + "-bar").style.background = data.warning ? "#ff4444" : "#00ff41";
+        document.getElementById(id + "-card").classList.toggle("warning", data.warning);
+      };
+
+      set("cpu", d.cpu);
+      set("ram", d.ram);
+      set("disk", d.disk);
+
+      document.getElementById("ram-detail").textContent = d.ram.used_gb + " / " + d.ram.total_gb + " GB";
+      document.getElementById("disk-detail").textContent = d.disk.used_gb + " / " + d.disk.total_gb + " GB";
+      document.getElementById("uptime").textContent = "last update: " + new Date().toLocaleTimeString();
+    }
+
+    update();
+    setInterval(update, 2000);
+  </script>
+</body>
+</html>
