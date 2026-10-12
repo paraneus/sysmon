@@ -18,4 +18,4 @@ def stats():
     return jsonify(get_stats())
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8000)
+    app.run(debug=os.getenv("FLASK_DEBUG") == "1", port=8000)
