@@ -12,16 +12,27 @@ A private learning project.
 
 ## Stack
 
-Python 3, Flask, psutil, HTML/CSS/JavaScript
+Python 3, Flask, psutil, HTML/CSS/JavaScript, Docker
 
-## Run
+## Run locally
 
 ```bash
-pip install flask psutil
+pip install -r requirements.txt
 python3 app.py
 ```
 
 Open http://localhost:8000
+
+## Run with Docker
+
+```bash
+docker build -t sysmon .
+docker run --rm -p 8000:8000 sysmon
+```
+
+Open http://localhost:8000
+
+Note: inside a container, psutil reads the host kernel's values, so sysmon shows the CPU and RAM of the host machine, not the limits of the container.
 
 ## Ideas
 
@@ -29,3 +40,4 @@ Open http://localhost:8000
 - Email alerts
 - Terminal dashboard (TUI)
 - systemd service
+- Kubernetes deployment with Helm
