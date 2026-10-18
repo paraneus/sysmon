@@ -34,6 +34,26 @@ Open http://localhost:8000
 
 Note: inside a container, psutil reads the host kernel's values, so sysmon shows the CPU and RAM of the host machine, not the limits of the container.
 
+## Run on Kubernetes (GitOps)
+
+Manifests are in `deploy/` (Deployment + Service).
+I deploy them with [Argo CD](https://argo-cd.readthedocs.io/) on a local k3d cluster:
+
+```bash
+docker build -t sysmon:0.1 .
+k3d image import sysmon:0.1 -c lab
+```
+
+Argo CD watches this repo (path `deploy/`) and syncs the manifests into the cluster.
+
+To open it locally:
+
+```bash
+kubectl port-forward svc/sysmon-ui 8000:8000
+```
+
+Open http://localhost:8000
+
 ## Ideas
 
 - History graph
@@ -41,3 +61,5 @@ Note: inside a container, psutil reads the host kernel's values, so sysmon shows
 - Terminal dashboard (TUI)
 - systemd service
 - Kubernetes deployment with Helm
+- CI pipeline that builds and pushes the image
+- Resource requests and limits
