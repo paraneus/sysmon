@@ -3,8 +3,10 @@ kind: Service
 metadata:
   name: sysmon-ui
 spec:
-  ports:
-  - port: 8000
-    targetPort: 8000
+  type: NodePort
   selector:
     app: sysmon-ui
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30080
