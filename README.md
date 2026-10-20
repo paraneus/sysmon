@@ -12,7 +12,7 @@ A private learning project.
 
 ## Stack
 
-Python 3, Flask, psutil, HTML/CSS/JavaScript, Docker
+Python 3, Flask, psutil, HTML/CSS/JavaScript, Docker, Kubernetes (k3d), Argo CD
 
 ## Run locally
 
@@ -36,23 +36,40 @@ Note: inside a container, psutil reads the host kernel's values, so sysmon shows
 
 ## Run on Kubernetes (GitOps)
 
-Manifests are in `deploy/` (Deployment + Service).
-I deploy them with [Argo CD](https://argo-cd.readthedocs.io/) on a local k3d cluster:
+Everything needed to run sysmon on a local k3d cluster lives in this repo:
+
+| Folder | What it describes |
+|---|---|
+| `cluster/` | the k3d cluster itself (ports bound to 127.0.0.1 only) |
+| `deploy/` | Kubernetes manifests (Deployment + NodePort Service) |
+| `argocd/` | the Argo CD application that syncs `deploy/` |
+
+### Quick start (plain kubectl)
 
 ```bash
+k3d cluster create --config cluster/k3d-lab.yaml
 docker build -t sysmon:0.1 .
 k3d image import sysmon:0.1 -c lab
+kubectl apply -f deploy/
 ```
 
-Argo CD watches this repo (path `deploy/`) and syncs the manifests into the cluster.
+Open http://localhost:30080
 
-To open it locally:
+### GitOps way (Argo CD)
+
+Instead of `kubectl apply -f deploy/`, install
+[Argo CD](https://argo-cd.readthedocs.io/) and let it sync this repo
+(after creating the cluster and importing the image as above):
 
 ```bash
-kubectl port-forward svc/sysmon-ui 8000:8000
+kubectl create namespace argocd
+kubectl apply -n argocd --server-side -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply -f argocd/sysmon.yaml
 ```
 
-Open http://localhost:8000
+Argo CD watches `deploy/` in this repo and keeps the cluster in sync
+with Git (auto-sync + self-heal). A change merged to `main` shows up
+in the cluster without running kubectl by hand.
 
 ## Ideas
 
