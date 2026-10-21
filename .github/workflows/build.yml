@@ -1,0 +1,36 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app.py"
+      - "monitor.py"
+      - "templates/**"
+      - "static/**"
+      - "requirements.txt"
+      - "Dockerfile"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: |
+            ghcr.io/paraneus/sysmon:${{ github.sha }}
+            ghcr.io/paraneus/sysmon:latest
